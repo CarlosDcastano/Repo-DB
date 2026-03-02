@@ -1,0 +1,99 @@
+create table invitados (
+	id_invitado serial primary key,
+	primer_nombre varchar(50) not null,
+	segundo_nombre varchar(50),
+	primer_apellido varchar(50) not null,
+	segundo_apellido varchar(50),
+	telefono numeric,
+	identificacion numeric,
+	genero boolean,
+	fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE invitados 
+ALTER COLUMN GENERO TYPE VARCHAR(2);
+
+
+COPY invitados(id_invitado, PRIMER_NOMBRE, SEGUNDO_NOMBRE, PRIMER_APELLIDO, SEGUNDO_APELLIDO, TELEFONO, IDENTIFICACION, GENERO)
+FROM 'C:/deibis.csv'
+DELIMITER ';'
+CSV HEADER;
+
+SELECT * FROM invitados LIMIT 5;
+
+delete from invitados;
+
+CREATE TABLE invitados (
+    id_invitado INTEGER PRIMARY KEY,
+    PRIMER_NOMBRE VARCHAR(100),
+    SEGUNDO_NOMBRE VARCHAR(100),
+    PRIMER_APELLIDO VARCHAR(100),
+    SEGUNDO_APELLIDO VARCHAR(100),
+    TELEFONO VARCHAR(20),
+    IDENTIFICACION VARCHAR(20),
+    GENERO VARCHAR(20)
+);
+
+COPY invitados(PRIMER_NOMBRE, SEGUNDO_NOMBRE, PRIMER_APELLIDO, SEGUNDO_APELLIDO, TELEFONO, IDENTIFICACION, GENERO)
+FROM 'C:/invidados.csv'
+DELIMITER ';'
+CSV HEADER;
+
+select * from invitados;
+
+
+
+/*LINUX
+No, en Linux la ruta cambia. Sería así:
+
+```sql
+COPY invitados(id_invitado, PRIMER_NOMBRE, SEGUNDO_NOMBRE, PRIMER_APELLIDO, SEGUNDO_APELLIDO, TELEFONO, IDENTIFICACION, GENERO)
+FROM '/home/tu_usuario/deibis.csv'
+DELIMITER ';'
+CSV HEADER;
+```
+
+---
+
+## Diferencias Windows vs Linux
+
+| | Windows | Linux |
+|---|---|---|
+| Ruta | `C:/Users/YE/Desktop/archivo.csv` | `/home/tu_usuario/archivo.csv` |
+| Lugar más fácil | Raíz `C:/` | Carpeta home `~/` |
+
+---
+
+## Tip para Linux
+
+Mueve el CSV a una ruta simple para evitar problemas de permisos:
+
+```bash
+# En la terminal de Linux
+mv deibis.csv /tmp/deibis.csv
+```
+
+Luego en DBeaver:
+
+```sql
+COPY invitados(id_invitado, PRIMER_NOMBRE, SEGUNDO_NOMBRE, PRIMER_APELLIDO, SEGUNDO_APELLIDO, TELEFONO, IDENTIFICACION, GENERO)
+FROM '/tmp/deibis.csv'
+DELIMITER ';'
+CSV HEADER;
+```
+
+> `/tmp/` es la carpeta más fácil en Linux porque PostgreSQL siempre tiene permisos para leerla */
+
+
+
+
+
+
+
+
+
+
+
+
+
+

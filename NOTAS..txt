@@ -1,0 +1,161 @@
+DDL - Crear estructura.
+-- Crear tabla
+CREATE TABLE productos (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100),
+    precio DECIMAL(10,2),
+    stock INTEGER
+);
+
+-- Modificar columna
+ALTER TABLE productos ADD COLUMN categoria VARCHAR(50);
+ALTER TABLE productos ALTER COLUMN precio TYPE NUMERIC;
+ALTER TABLE productos DROP COLUMN stock;
+
+-- Eliminar tabla
+DROP TABLE productos;
+
+-- Vaciar tabla sin eliminarla
+TRUNCATE TABLE productos;
+
+DML  - Manipular datos
+-- Insertar
+INSERT INTO productos(nombre, precio) VALUES('Camisa', 29.99);
+
+-- Insertar varios a la vez
+INSERT INTO productos(nombre, precio) VALUES
+('Camisa', 29.99),
+('Pantalón', 49.99),
+('Zapatos', 89.99);
+
+-- Actualizar
+UPDATE productos SET precio = 35.00 WHERE id = 1;
+
+-- Eliminar
+DELETE FROM productos WHERE id = 1;
+
+
+SELECT - Consultar:
+-- Básico
+SELECT * FROM productos;
+SELECT nombre, precio FROM productos;
+
+-- Filtrar
+SELECT * FROM productos WHERE precio > 30;
+SELECT * FROM productos WHERE nombre = 'Camisa';
+
+-- Ordenar
+SELECT * FROM productos ORDER BY precio ASC;
+SELECT * FROM productos ORDER BY precio DESC;
+
+-- Limitar resultados
+SELECT * FROM productos LIMIT 10;
+
+-- Contar
+SELECT COUNT(*) FROM productos;
+
+-- Agrupar
+SELECT categoria, COUNT(*) FROM productos GROUP BY categoria;
+
+-- Tener (filtro sobre agrupaciones)
+SELECT categoria, COUNT(*) FROM productos 
+GROUP BY categoria 
+HAVING COUNT(*) > 5;
+
+-- Buscar parecidos
+SELECT * FROM productos WHERE nombre LIKE '%camisa%';
+
+-- Valores únicos
+SELECT DISTINCT categoria FROM productos;
+
+-- Renombrar columna en resultado
+SELECT nombre AS producto, precio AS valor FROM productos;
+```
+
+---
+
+## JOINS — Combinar tablas
+
+Imagina estas dos tablas:
+```
+clientes: id_cliente, nombre
+pedidos:  id_pedido, id_cliente, producto
+
+-- INNER JOIN: solo los que coinciden en AMBAS tablas
+SELECT c.nombre, p.producto
+FROM clientes c
+INNER JOIN pedidos p ON c.id_cliente = p.id_cliente;
+
+-- LEFT JOIN: todos los de la izquierda, coincidan o no
+-- (clientes aunque no tengan pedidos)
+SELECT c.nombre, p.producto
+FROM clientes c
+LEFT JOIN pedidos p ON c.id_cliente = p.id_cliente;
+
+-- RIGHT JOIN: todos los de la derecha, coincidan o no
+-- (pedidos aunque no tengan cliente asociado)
+SELECT c.nombre, p.producto
+FROM clientes c
+RIGHT JOIN pedidos p ON c.id_cliente = p.id_cliente;
+
+-- FULL JOIN: todos de ambas tablas, coincidan o no
+SELECT c.nombre, p.producto
+FROM clientes c
+FULL OUTER JOIN pedidos p ON c.id_cliente = p.id_cliente;
+
+Visualización de JOINs
+JOIN ¿Qué trae? INNER Solo los que coinciden en ambas tablas
+LEFT Todos de la izquierda + coincidencias
+RIGHT Todos de la derecha + coincidencias
+FULL Todos de ambas tablas
+
+JOIN con 3 tablas.
+SELECT c.nombre, p.producto, cat.nombre AS categoria
+FROM clientes c
+INNER JOIN pedidos p ON c.id_cliente = p.id_cliente
+INNER JOIN categorias cat ON p.id_categoria = cat.id_categoria;
+
+FUNCIONES UTILES:
+-- Matemáticas
+SELECT SUM(precio) FROM productos;
+SELECT AVG(precio) FROM productos;
+SELECT MAX(precio) FROM productos;
+SELECT MIN(precio) FROM productos;
+
+-- Texto
+SELECT UPPER(nombre) FROM productos;       -- MAYÚSCULAS
+SELECT LOWER(nombre) FROM productos;       -- minúsculas
+SELECT LENGTH(nombre) FROM productos;      -- largo del texto
+SELECT CONCAT(nombre, ' - ', precio) FROM productos;
+
+-- Fechas
+SELECT NOW();                              -- fecha y hora actual
+SELECT CURRENT_DATE;                       -- solo fecha
+SELECT EXTRACT(YEAR FROM NOW());           -- extraer año
+
+PROCEDIMIENTOS ALMACENADOS:
+-- Crear
+CREATE OR REPLACE FUNCTION obtener_por_categoria(cat VARCHAR)
+RETURNS TABLE(id INT, nombre VARCHAR, precio NUMERIC) AS $$
+BEGIN
+  RETURN QUERY 
+  SELECT p.id, p.nombre, p.precio 
+  FROM productos p 
+  WHERE p.categoria = cat;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Ejecutar
+SELECT * FROM obtener_por_categoria('Ropa');
+
+-- Eliminar
+DROP FUNCTION obtener_por_categoria;
+
+TRANSACCIONES:
+BEGIN;
+  UPDATE cuentas SET saldo = saldo - 100 WHERE id = 1;
+  UPDATE cuentas SET saldo = saldo + 100 WHERE id = 2;
+COMMIT;   -- confirmar cambios
+
+-- Si algo sale mal
+ROLLBACK; -- deshacer todo
